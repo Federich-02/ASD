@@ -8,10 +8,9 @@ ostream &operator << (ostream &out, const vector<int> &vec);
 istream &operator >> (istream &in, vector<int> &vec);
 
 int periodNaive(string str);
-int periodSmart();
+int periodSmart(string str);
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
     string str = "";
 
     cin >> str;
@@ -24,10 +23,8 @@ int main(int argc, char const *argv[])
 // Calculate fractionary period of a string
 int periodNaive(string str) {
     for (int p = 0; p < str.length(); p++){
-        for (int i = 1; i < str.length(); i++){
-            if (str.at(p) == str.at(i+p)){
-                return i - p;
-            }
+        if (str.substr(1, str.length() - p) == str.substr(p + 1, str.length())){
+            return p;
         }
     }
 
