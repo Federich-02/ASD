@@ -1,6 +1,8 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <regex>
+#include <string>
 
 using namespace std;
 
@@ -28,45 +30,37 @@ struct node {
 
 ostream &operator<<(ostream &out, const vector<int> &vec);
 istream &operator>>(istream &in, vector<int> &vec);
+void tokenize(std::string const &str, const char delim, std::vector<std::string> &out);
 void preOrderPrint(node *root);
 void inOrderPrint(node *node);
 void insertBST(node *&root, int k);
+
+string readBSTfromPolishFrom();
+
+// BST verify
+void buildBSTfromPolishForm(vector<int> input, node *root);
+
+// BST graphically print 
 void printBT(const std::string& prefix, const node* node, bool isLeft);
 void printBT(const node* node);
 
 int main(int argc, char const *argv[]) {
+    vector<string> input = vector<string>();
+
     node *root = nullptr;
 
-    vector<int> A = vector<int>();
+    readBSTfromPolishFrom(input);
 
-    cin >> A;
+    /// Print input for debug
+    // for (int i = 0; i < input.size(); i++) {
+    //     cout << input[i] << " ";
+    // }
 
-    for (int i=0; i<A.size(); i++){
-        insertBST(root, A.at(i));
-    }
 
-    inOrderPrint(root);
+    
 
 
     return 0;
-}
-
-// Pre-Order visit to generic tree
-void preOrderPrint(node *node) {
-    if (node != nullptr) {
-        cout << node->key << " ";
-        preOrderPrint(node->left);
-        preOrderPrint(node->right);
-    }
-}
-
-// In-Order visit to generic tree
-void inOrderPrint( node *node) {
-    if (node != nullptr) {
-        inOrderPrint(node->left);
-        cout << node->key << " ";
-        inOrderPrint(node->right);
-    }
 }
 
 // Insert a new key in a BST
@@ -103,6 +97,47 @@ void insertBST(node *&root, int k) {
     }
 }
 
+// Build a BST from polish form
+void buildBSTfromPolishForm(vector<int> input, node *root){
+    root = new node(input.at(0));
+
+    node *left;
+    node *right;
+
+    int len = 3;
+
+    while (len < input.size()) {
+        if (left->key != 0){
+            left->left->key = input.at(len);
+            left->right->key = input.at(len + 1);
+
+            left = left->left;
+            right = left->right;
+        } else {
+            right->left->key = input.at(len);
+            right->right->key = input.at(len + 1);
+
+            left = right->left;
+            right = right->right;
+        }
+        len += 2;
+    }
+    
+    
+    
+}
+
+// Read BST input from polish form for build a BST
+void readBSTfromPolishFrom(vector<string> &out){
+    string line;
+
+    getline(cin, line);
+
+    tokenize(line, ' ', out);
+}
+ 
+
+/// COMMON OPERATION
 ostream &operator << (ostream &out, const vector<int> &vec) {
     for (int i = 0; i < vec.size(); i++)
         out << vec[i] << " ";
@@ -117,9 +152,21 @@ istream &operator >> (istream &in, vector<int> &vec) {
     istringstream is(line);
     // convert new input stream into array
     int value;
-    while (is >> value)
+    while (is >> value){
+        
         vec.push_back(value);
+    }
     return in;
+}
+
+void tokenize(string const &str, const char delim, vector<string> &out) { 
+    // construct a stream from the string 
+    stringstream ss(str); 
+ 
+    string s; 
+    while (std::getline(ss, s, delim)) { 
+        out.push_back(s); 
+    }
 }
 
 void printBT(const std::string& prefix, const node* node, bool isLeft){
@@ -134,6 +181,24 @@ void printBT(const std::string& prefix, const node* node, bool isLeft){
         // enter the next tree level - left and right branch
         printBT( prefix + (isLeft ? "|   " : "    "), node->right, true);
         printBT( prefix + (isLeft ? "|   " : "    "), node->left, false);
+    }
+}
+
+// In-Order visit to generic tree
+void inOrderPrint( node *node) {
+    if (node != nullptr) {
+        inOrderPrint(node->left);
+        cout << node->key << " ";
+        inOrderPrint(node->right);
+    }
+}
+
+// Pre-Order visit to generic tree
+void preOrderPrint(node *node) {
+    if (node != nullptr) {
+        cout << node->key << " ";
+        preOrderPrint(node->left);
+        preOrderPrint(node->right);
     }
 }
 
