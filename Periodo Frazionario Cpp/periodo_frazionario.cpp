@@ -22,16 +22,13 @@ int main(int argc, char const *argv[]) {
 
 // Calculate fractionary period of a string in naive mode
 int periodNaive(string str) {
-    int p = 0;
-    int j = 0;
+    int p, j;
     
-    for (p = 1; p <= str.size(); p++) {
-        for (j = p+1; j <= str.size(); j++) {
-            if (str.at(j) != str.at(j-p))
-                break;
+    for (p = 1; p < str.size(); p++) {
+        for (j = p+1; j < str.size()+1 && str.at(j-1) == str.at(j-p-1); j++) {
+            if (j == str.size()) return p;
         }
-        if (j == str.size())
-            return p;
+        
     }
     return p;
 }
