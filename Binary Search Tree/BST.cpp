@@ -1,8 +1,6 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <regex>
-#include <string>
 
 using namespace std;
 
@@ -31,14 +29,15 @@ struct node {
 ostream &operator<<(ostream &out, const vector<int> &vec);
 istream &operator>>(istream &in, vector<int> &vec);
 void tokenize(std::string const &str, const char delim, std::vector<std::string> &out);
-void preOrderPrint(node *root);
-void inOrderPrint(node *node);
+void modPreOrderPrint(node *root);
+void modInOrderPrint(node *node, vector<int> &out, int i);
 void insertBST(node *&root, int k);
 
-string readBSTfromPolishFrom();
+void readBSTfromPolishFrom(vector<string> &out);
 
 // BST verify
-void buildBSTfromPolishForm(vector<int> input, node *root);
+void buildBSTfromPolishForm(vector<string> input, node *&root);
+int checkBST(node *root);
 
 // BST graphically print 
 void printBT(const std::string& prefix, const node* node, bool isLeft);
@@ -51,19 +50,23 @@ int main(int argc, char const *argv[]) {
 
     readBSTfromPolishFrom(input);
 
-    /// Print input for debug
+    // Print input for debug
     // for (int i = 0; i < input.size(); i++) {
     //     cout << input[i] << " ";
     // }
 
+    buildBSTfromPolishForm(input, root);
 
+    
+    cout << endl;
+    printBT(root);
     
 
 
     return 0;
 }
 
-// Insert a new key in a BST
+/// Insert a new key in a BST
 void insertBST(node *&root, int k) {
     node *newNode = new node(k);
     
@@ -97,45 +100,69 @@ void insertBST(node *&root, int k) {
     }
 }
 
-// Build a BST from polish form
-void buildBSTfromPolishForm(vector<int> input, node *root){
-    root = new node(input.at(0));
-
-    node *left;
-    node *right;
-
-    int len = 3;
-
-    while (len < input.size()) {
-        if (left->key != 0){
-            left->left->key = input.at(len);
-            left->right->key = input.at(len + 1);
-
-            left = left->left;
-            right = left->right;
-        } else {
-            right->left->key = input.at(len);
-            right->right->key = input.at(len + 1);
-
-            left = right->left;
-            right = right->right;
-        }
-        len += 2;
+/// Build a BST from polish form
+void buildBSTfromPolishForm(vector<string> input, node *&root) {
+    // Insert root (If null return)
+    if (input[0] == "NULL") {
+        node *newNode = new node(-1);
+        root = newNode;
+        return;
+    } else {
+        node *newNode = new node(stoi(input[0]));
+        root = newNode;
     }
-    
-    
-    
+
+    // Insert all elements
+    node *prec = root;
+
+    for (int i = 1; i < input.size(); i++) {
+        node *newNode = nullptr;
+        
+        if (input[i] == "NULL") {
+            newNode = new node(-1);
+
+            if (prec->left == nullptr) {
+                prec->left = newNode;
+            } else if (prec->right == nullptr) {
+                prec->right = newNode;
+            }
+            newNode->parent = prec;
+            while (prec->left != nullptr && prec->right != nullptr && i < input.size() -1) {
+                prec = prec->parent;
+            }
+        } else {
+            newNode = new node(stoi(input[i]));
+            
+            if (prec->left == nullptr) {
+                prec->left = newNode;
+            } else if (prec->right == nullptr) {
+                prec->right = newNode;
+            }
+            newNode->parent = prec;
+            prec = newNode;
+        }
+    }
 }
 
-// Read BST input from polish form for build a BST
+/// Read BST input from polish form for build a BST
 void readBSTfromPolishFrom(vector<string> &out){
+    // Get input from console
     string line;
-
     getline(cin, line);
 
-    tokenize(line, ' ', out);
+    // Convert input into a new string-stream
+    stringstream ss(line);
+
+    // Convert stream into a array
+    string s;
+    while (getline(ss, s, ' ')) {
+        out.push_back(s);
+    }
 }
- 
+
+int checkBST(node *root){
+    return 0;
+}
 
 /// COMMON OPERATION
 ostream &operator << (ostream &out, const vector<int> &vec) {
@@ -159,24 +186,14 @@ istream &operator >> (istream &in, vector<int> &vec) {
     return in;
 }
 
-void tokenize(string const &str, const char delim, vector<string> &out) { 
-    // construct a stream from the string 
-    stringstream ss(str); 
- 
-    string s; 
-    while (std::getline(ss, s, delim)) { 
-        out.push_back(s); 
-    }
-}
-
-void printBT(const std::string& prefix, const node* node, bool isLeft){
+void printBT(const string& prefix, const node* node, bool isLeft){
     if( node != nullptr ) {
-        std::cout << prefix;
+        cout << prefix;
 
-        std::cout << (isLeft ? "|--" : "---" );
+        cout << (isLeft ? "|--" : "---" );
 
         // print the value of the node
-        std::cout << node->key << std::endl;
+        cout << "(" << node->key << ")" << endl;
 
         // enter the next tree level - left and right branch
         printBT( prefix + (isLeft ? "|   " : "    "), node->right, true);
@@ -184,24 +201,21 @@ void printBT(const std::string& prefix, const node* node, bool isLeft){
     }
 }
 
-// In-Order visit to generic tree
-void inOrderPrint( node *node) {
-    if (node != nullptr) {
-        inOrderPrint(node->left);
-        cout << node->key << " ";
-        inOrderPrint(node->right);
-    }
-}
-
-// Pre-Order visit to generic tree
-void preOrderPrint(node *node) {
-    if (node != nullptr) {
-        cout << node->key << " ";
-        preOrderPrint(node->left);
-        preOrderPrint(node->right);
-    }
-}
-
 void printBT(const node* node){
     printBT("", node, false);    
+}
+
+/// In-Order visit to generic tree
+vector<int> modInOrderPrint(node *root) {
+    // TODO: Implements
+    
+}
+
+/// Pre-Order visit to generic tree
+void modPreOrderPrint(node *node) {
+    if (node->key != -1) {
+        cout << node->key << " ";
+        modPreOrderPrint(node->left);
+        modPreOrderPrint(node->right);
+    }
 }
