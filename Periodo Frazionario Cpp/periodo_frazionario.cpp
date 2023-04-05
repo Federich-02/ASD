@@ -20,15 +20,20 @@ int main(int argc, char const *argv[]) {
     return 0;
 }
 
-// Calculate fractionary period of a string
+// Calculate fractionary period of a string in naive mode
 int periodNaive(string str) {
-    for (int p = 0; p < str.length(); p++){
-        if (str.substr(1, str.length() - p) == str.substr(p + 1, str.length())){
-            return p;
+    int p = 0;
+    int j = 0;
+    
+    for (p = 1; p <= str.size(); p++) {
+        for (j = p+1; j <= str.size(); j++) {
+            if (str.at(j) != str.at(j-p))
+                break;
         }
+        if (j == str.size())
+            return p;
     }
-
-    return -1;
+    return p;
 }
 
 
