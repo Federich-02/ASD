@@ -9,6 +9,7 @@ istream &operator >> (istream &in, vector<int> &vec);
 
 int periodNaive(string str);
 int periodSmart(string str);
+int periodSub(string str);
 
 int main(int argc, char const *argv[]) {
     string str = "";
@@ -17,8 +18,31 @@ int main(int argc, char const *argv[]) {
 
     cout << periodNaive(str)<<endl;
     cout << periodSmart(str)<<endl;
+    cout << periodSub(str)<<endl;
 
     return 0;
+}
+
+int periodSub(string str){
+    int n = str.size();
+    int p, x;
+
+    for(p=1; p<n; p++){
+        if(p<=n/2){x=p;}else{x=n-p;}
+
+        int j=0;
+        while((j+x)<n && str.substr(j,x)==str.substr(j+p,x)){
+            j+=p;
+
+            if((j+x+x)>n){ x=n-j-x; }
+            if(x==0){return p;}
+        }
+
+        if((j+x)>=n){
+            return p;
+        }
+    }
+    return p;
 }
 
 // Calculate fractionary period of a string in naive mode
