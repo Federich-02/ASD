@@ -15,7 +15,8 @@ int main(int argc, char const *argv[]) {
 
     cin >> str;
 
-    cout << periodNaive(str);
+    cout << periodNaive(str)<<endl;
+    cout << periodSmart(str)<<endl;
 
     return 0;
 }
@@ -30,6 +31,23 @@ int periodNaive(string str) {
         }
         
     }
+    return p;
+}
+int periodSmart(string str){
+    int n = str.length();
+    vector<int> r(n, 0);
+    
+    for (int i = 1; i < n; i++) {
+        int j = r[i-1];
+        while (j > 0 && str.at(i) != str.at(j)) {
+            j = r[j-1];
+        }
+        if (str.at(i) == str.at(j)) {
+            r[i] = j+1;
+        }
+    }
+
+    int p = n - r[n-1];
     return p;
 }
 
