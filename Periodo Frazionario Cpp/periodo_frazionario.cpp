@@ -9,6 +9,7 @@ istream &operator >> (istream &in, vector<int> &vec);
 
 int periodNaive(string str);
 int periodSmart(string str);
+int periodSub(string str);
 
 string generateStringFromLength(int len);
 
@@ -17,9 +18,33 @@ int main(int argc, char const *argv[]) {
 
     cin >> str;
 
-    cout << periodNaive(str);
+    cout << periodNaive(str)<<endl;
+    cout << periodSmart(str)<<endl;
+    cout << periodSub(str)<<endl;
 
     return 0;
+}
+
+int periodSub(string str){
+    int n = str.size();
+    int p, x;
+
+    for(p=1; p<n; p++){
+        if(p<=n/2){x=p;}else{x=n-p;}
+
+        int j=0;
+        while((j+x)<n && str.substr(j,x)==str.substr(j+p,x)){
+            j+=p;
+
+            if((j+x+x)>n){ x=n-j-x; }
+            if(x==0){return p;}
+        }
+
+        if((j+x)>=n){
+            return p;
+        }
+    }
+    return p;
 }
 
 // Calculate fractionary period of a string in naive mode
@@ -32,6 +57,23 @@ int periodNaive(string str) {
         }
         
     }
+    return p;
+}
+int periodSmart(string str){
+    int n = str.length();
+    vector<int> r(n, 0);
+    
+    for (int i = 1; i < n; i++) {
+        int j = r[i-1];
+        while (j > 0 && str.at(i) != str.at(j)) {
+            j = r[j-1];
+        }
+        if (str.at(i) == str.at(j)) {
+            r[i] = j+1;
+        }
+    }
+
+    int p = n - r[n-1];
     return p;
 }
 
