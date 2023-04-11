@@ -10,6 +10,8 @@ istream &operator >> (istream &in, vector<int> &vec);
 int periodNaive(string str);
 int periodSmart(string str);
 
+string generateStringFromLength(int len);
+
 int main(int argc, char const *argv[]) {
     string str = "";
 
@@ -33,6 +35,12 @@ int periodNaive(string str) {
     return p;
 }
 
+string generateStringFromLength(int len){
+    int period = rand() % (len - 2) + 1;
+    int cmp_period = len - period;
+
+    
+}
 
 ostream &operator << (ostream &out, const vector<int> &vec) {
     for (int i = 0; i < vec.size(); i++)
