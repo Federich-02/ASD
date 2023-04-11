@@ -2,8 +2,13 @@
 #include <sstream>
 #include <vector>
 #include <time.h>
+#include <chrono>
+#include <math.h>
 
 using namespace std;
+using namespace std::chrono;
+
+#define NUM_OF_RIPETITION 5
 
 ostream &operator << (ostream &out, const vector<int> &vec);
 istream &operator >> (istream &in, vector<int> &vec);
@@ -13,20 +18,63 @@ int periodSmart(string str);
 int periodNaiveSub(string str);
 
 string generateStringFromLength(int len);
+double getResolution();
+void insertionSort (vector<double> &data, int n);
+
+typedef duration<double, seconds::period> secs;
 
 int main(int argc, char const *argv[]) {
     string str = "";
     int len = 0;
+    double ris = getResolution();
+    int count = 0;
 
-    cin >> len;
+    vector<double> algTimes = vector<double>();
+    vector<double> tempAlgTimesByLen = vector<double>();
 
-    str = generateStringFromLength(len);
+    cout << "Internal clock resolution: " << ris << endl;
 
-    cout << "Generated string: " << str << endl;
+    /// ----------------------TEST----------------------
+    // cin >> len;
 
-    cout << "Naive: " << periodNaive(str) << endl;
-    cout << "Naive (Sub): " << periodNaiveSub(str) << endl;
-    cout << "Smart " << periodSmart(str) << endl;
+    // str = generateStringFromLength(len);
+
+    // cout << "Generated string: " << str << endl;
+
+    // cout << "Naive: " << periodNaive(str) << endl;
+    // cout << "Naive (Sub): " << periodNaiveSub(str) << endl;
+    // cout << "Smart " << periodSmart(str) << endl;
+
+    /// ----------------------MISURATION----------------------
+    steady_clock::time_point end;
+    steady_clock::time_point start;
+    
+    for (int i = 0; i < 100; i++) {
+        len = 1000 * pow(1.06478598, i);
+        
+        for (int j = 0; j < NUM_OF_RIPETITION; j++) {
+            count = 0;
+            str = generateStringFromLength(len);
+            
+            start = steady_clock::now();
+            do {
+                periodSmart(str);
+                count++;
+                end = steady_clock::now();
+            }while(duration_cast<secs>(end - start).count() <= (ris * (1/0.001 + 1)));
+            
+            double tempTime = (duration_cast<secs>(end - start).count()) / count;
+            tempAlgTimesByLen.push_back(tempTime);
+        }
+        
+        // insertionSort(tempAlgTimesByLen, NUM_OF_RIPETITION);
+        algTimes.push_back(tempAlgTimesByLen.at(NUM_OF_RIPETITION/2));
+        tempAlgTimesByLen.clear();
+    }
+    
+    for (int i = 0; i < algTimes.size(); i++) {
+        cout << fixed << (1000 * pow(1.06478598, i)) << "\t" << algTimes.at(i) << endl;
+    }
     
 
     return 0;
@@ -104,9 +152,34 @@ string generateStringFromLength(int len){
         str.push_back(str.at(i % period));
     }
     
-    cout << "Generated period: " << period << endl;
+    // cout << "Generated period: " << period << endl;
 
     return str;
+}
+
+// Get resolution of internal clock
+double getResolution() {
+    steady_clock::time_point start = steady_clock::now();
+    steady_clock::time_point end;
+    do {
+        end = steady_clock::now();
+    } while (start == end);
+    
+    return duration_cast<secs>(end - start).count();
+}
+
+void insertionSort (vector<double> &data, int n) {
+    int i, j, tmp;
+
+    for (i=1; i<n; i++) {
+        j=i;
+        tmp=data[i];
+        while (j>0 && tmp<data[j-1]) {
+            data[j]=data[j-1];
+            j--;
+        }
+        data[j]=tmp;
+    }
 }
 
 ostream &operator << (ostream &out, const vector<int> &vec) {
