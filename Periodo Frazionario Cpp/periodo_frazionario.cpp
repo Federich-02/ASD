@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <time.h>
 
 using namespace std;
 
@@ -9,23 +10,30 @@ istream &operator >> (istream &in, vector<int> &vec);
 
 int periodNaive(string str);
 int periodSmart(string str);
-int periodSub(string str);
+int periodNaiveSub(string str);
 
 string generateStringFromLength(int len);
 
 int main(int argc, char const *argv[]) {
     string str = "";
+    int len = 0;
 
-    cin >> str;
+    cin >> len;
 
-    cout << periodNaive(str)<<endl;
-    cout << periodSmart(str)<<endl;
-    cout << periodSub(str)<<endl;
+    str = generateStringFromLength(len);
+
+    cout << "Generated string: " << str << endl;
+
+    cout << "Naive: " << periodNaive(str) << endl;
+    cout << "Naive (Sub): " << periodNaiveSub(str) << endl;
+    cout << "Smart " << periodSmart(str) << endl;
+    
 
     return 0;
 }
 
-int periodSub(string str){
+// Calculate min period of string with substring (Naive)
+int periodNaiveSub(string str){
     int n = str.size();
     int p, x;
 
@@ -47,7 +55,7 @@ int periodSub(string str){
     return p;
 }
 
-// Calculate fractionary period of a string in naive mode
+// Calculate min period of a string (Naive)
 int periodNaive(string str) {
     int p, j;
     
@@ -59,6 +67,8 @@ int periodNaive(string str) {
     }
     return p;
 }
+
+// Calculate min period of a string (Smart)
 int periodSmart(string str){
     int n = str.length();
     vector<int> r(n, 0);
@@ -77,11 +87,26 @@ int periodSmart(string str){
     return p;
 }
 
+// Generate a string from length
 string generateStringFromLength(int len){
-    int period = rand() % (len - 2) + 1;
-    int cmp_period = len - period;
+    srand(time(NULL));
+    string str = "";
+    int period = rand() % (len - 1) + 1;
 
+    // Generate period
+    for (int i = 0; i < period; i++) {
+        char c = rand() % 3 + 97;
+        str.push_back(c);
+    }
     
+    // Copy period
+    for (int i = period; i < len; i++) {
+        str.push_back(str.at(i % period));
+    }
+    
+    cout << "Generated period: " << period << endl;
+
+    return str;
 }
 
 ostream &operator << (ostream &out, const vector<int> &vec) {
