@@ -4,7 +4,7 @@
 
 using namespace std;
 
-// Generic node of a Binary Tree
+/// Generic node of a Binary Tree
 struct node {
     int key;
     node *left;
@@ -26,47 +26,42 @@ struct node {
     }
 };
 
-ostream &operator<<(ostream &out, const vector<int> &vec);
-istream &operator>>(istream &in, vector<int> &vec);
-void tokenize(std::string const &str, const char delim, std::vector<std::string> &out);
-void modPreOrderPrint(node *root);
-void modInOrderPrint(node *node, vector<int> &out, int i);
+/// BST operations
+void readBSTfromPolishFrom(vector<string> &out);
+void buildBSTfromPolishForm(vector<string> input, node *&root);
+
 void insertBST(node *&root, int k);
 
-void readBSTfromPolishFrom(vector<string> &out);
+node* BSTSuccessor(node *x);
+node* BSTMin(node *x);
 
-// BST verify
-void buildBSTfromPolishForm(vector<string> input, node *&root);
 int checkBST(node *root);
 
-// BST graphically print 
+/// BST graphically print - No required
+ostream &operator << (ostream &out, const vector<int> &vec);
+istream &operator >> (istream &in, vector<int> &vec);
+
 void printBT(const std::string& prefix, const node* node, bool isLeft);
 void printBT(const node* node);
 
 int main(int argc, char const *argv[]) {
+    
+    // -----------------------Exercise 18-----------------------
+    
     vector<string> input = vector<string>();
-
     node *root = nullptr;
 
     readBSTfromPolishFrom(input);
 
-    // Print input for debug
-    // for (int i = 0; i < input.size(); i++) {
-    //     cout << input[i] << " ";
-    // }
-
     buildBSTfromPolishForm(input, root);
 
+    cout << checkBST(root) << endl;
     
-    cout << endl;
-    printBT(root);
-    
-
-
     return 0;
 }
 
-/// Insert a new key in a BST
+/// -----------------------BST operations-----------------------
+// Insert a new key in a BST
 void insertBST(node *&root, int k) {
     node *newNode = new node(k);
     
@@ -100,7 +95,7 @@ void insertBST(node *&root, int k) {
     }
 }
 
-/// Build a BST from polish form
+// Build a BST from polish form
 void buildBSTfromPolishForm(vector<string> input, node *&root) {
     // Insert root (If null return)
     if (input[0] == "NULL") {
@@ -144,7 +139,7 @@ void buildBSTfromPolishForm(vector<string> input, node *&root) {
     }
 }
 
-/// Read BST input from polish form for build a BST
+// Read BST input from polish form for build a BST
 void readBSTfromPolishFrom(vector<string> &out){
     // Get input from console
     string line;
@@ -160,11 +155,44 @@ void readBSTfromPolishFrom(vector<string> &out){
     }
 }
 
-int checkBST(node *root){
-    return 0;
+// Check a if a tree is a BST
+int checkBST(node *root) {
+    node *x = BSTMin(root);
+
+    while (BSTSuccessor(x) != nullptr) {        
+        if (x->key > BSTSuccessor(x)->key){
+            return 0;
+        }
+        x = BSTSuccessor(x);
+    }
+    
+    return 1;
 }
 
-/// COMMON OPERATION
+// Find the successor of a node in BST (if not exist then return null)
+node* BSTSuccessor(node *x){
+    if (x->right->key != -1){
+        return BSTMin(x->right);
+    } else {
+        node *y = x->parent;
+        while (y != nullptr && x != y->left) {
+            x = y;
+            y = x->parent;
+        }
+        return y;
+    }
+}
+
+// Find the node with min value of a BST
+node* BSTMin(node *x){
+    if (x->key != -1 && x->left->key == -1) {
+        return x;
+    } else {
+        return BSTMin(x->left);
+    }
+}
+
+/// -----------------------COMMON OPERATION-----------------------
 ostream &operator << (ostream &out, const vector<int> &vec) {
     for (int i = 0; i < vec.size(); i++)
         out << vec[i] << " ";
@@ -186,6 +214,10 @@ istream &operator >> (istream &in, vector<int> &vec) {
     return in;
 }
 
+void printBT(const node* node){
+    printBT("", node, false);    
+}
+
 void printBT(const string& prefix, const node* node, bool isLeft){
     if( node != nullptr ) {
         cout << prefix;
@@ -198,24 +230,5 @@ void printBT(const string& prefix, const node* node, bool isLeft){
         // enter the next tree level - left and right branch
         printBT( prefix + (isLeft ? "|   " : "    "), node->right, true);
         printBT( prefix + (isLeft ? "|   " : "    "), node->left, false);
-    }
-}
-
-void printBT(const node* node){
-    printBT("", node, false);    
-}
-
-/// In-Order visit to generic tree
-vector<int> modInOrderPrint(node *root) {
-    // TODO: Implements
-    
-}
-
-/// Pre-Order visit to generic tree
-void modPreOrderPrint(node *node) {
-    if (node->key != -1) {
-        cout << node->key << " ";
-        modPreOrderPrint(node->left);
-        modPreOrderPrint(node->right);
     }
 }
