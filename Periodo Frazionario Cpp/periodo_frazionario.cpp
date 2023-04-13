@@ -32,7 +32,7 @@ int main(int argc, char const *argv[]) {
     vector<double> algTimes = vector<double>();
     vector<double> tempAlgTimesByLen = vector<double>();
 
-    cout << "Internal clock resolution: " << fixed << ris << endl;
+    cout << "Internal clock resolution: " << ris << endl;
 
     /// ----------------------TEST----------------------
     // cin >> len;
@@ -58,7 +58,7 @@ int main(int argc, char const *argv[]) {
             
             start = steady_clock::now();
             do {
-                periodSmart(str);
+                periodNaive(str);
                 count++;
                 end = steady_clock::now();
             }while(duration_cast<secs>(end - start).count() <= (ris * (1/0.001 + 1)));
@@ -68,15 +68,14 @@ int main(int argc, char const *argv[]) {
         }
         
         // insertionSort(tempAlgTimesByLen, NUM_OF_REPETITION);
-        algTimes.push_back(tempAlgTimesByLen.at(NUM_OF_REPETITION/2));
+        algTimes.push_back(tempAlgTimesByLen.at(2));
         tempAlgTimesByLen.clear();
     }
     
     for (int i = 0; i < algTimes.size(); i++) {
-        cout << fixed << int (1000 * pow(1.06478598, i)) << "\t" << algTimes.at(i) << endl;
+        cout << fixed << algTimes.at(i) << endl;
     }
     
-
     return 0;
 }
 
@@ -118,7 +117,7 @@ int periodNaive(string str) {
 
 // Calculate min period of a string (Smart)
 int periodSmart(string str){
-    int n = str.length();
+    const int n = str.length();
     //vector<int> r(n, 0);
     int r[n];
 
@@ -174,9 +173,9 @@ double getResolution() {
 }
 
 void insertionSort (vector<double> &data, int n) {
-    int i, j, tmp;
+    int j, tmp;
 
-    for (i=1; i<n; i++) {
+    for (int i=1; i<n; i++) {
         j=i;
         tmp=data[i];
         while (j>0 && tmp<data[j-1]) {
