@@ -119,7 +119,12 @@ int periodNaive(string str) {
 // Calculate min period of a string (Smart)
 int periodSmart(string str){
     int n = str.length();
-    vector<int> r(n, 0);
+    //vector<int> r(n, 0);
+    int r[n];
+
+    for(int i=0;i<n;i++){
+        r[i]=0;
+    }
     
     for (int i = 1; i < n; i++) {
         int j = r[i-1];
