@@ -8,7 +8,7 @@
 using namespace std;
 using namespace std::chrono;
 
-#define NUM_OF_RIPETITION 5
+#define NUM_OF_REPETITION 5
 
 ostream &operator << (ostream &out, const vector<int> &vec);
 istream &operator >> (istream &in, vector<int> &vec);
@@ -32,7 +32,7 @@ int main(int argc, char const *argv[]) {
     vector<double> algTimes = vector<double>();
     vector<double> tempAlgTimesByLen = vector<double>();
 
-    cout << "Internal clock resolution: " << ris << endl;
+    cout << "Internal clock resolution: " << fixed << ris << endl;
 
     /// ----------------------TEST----------------------
     // cin >> len;
@@ -52,7 +52,7 @@ int main(int argc, char const *argv[]) {
     for (int i = 0; i < 100; i++) {
         len = 1000 * pow(1.06478598, i);
         
-        for (int j = 0; j < NUM_OF_RIPETITION; j++) {
+        for (int j = 0; j < NUM_OF_REPETITION; j++) {
             count = 0;
             str = generateStringFromLength(len);
             
@@ -67,13 +67,13 @@ int main(int argc, char const *argv[]) {
             tempAlgTimesByLen.push_back(tempTime);
         }
         
-        // insertionSort(tempAlgTimesByLen, NUM_OF_RIPETITION);
-        algTimes.push_back(tempAlgTimesByLen.at(NUM_OF_RIPETITION/2));
+        // insertionSort(tempAlgTimesByLen, NUM_OF_REPETITION);
+        algTimes.push_back(tempAlgTimesByLen.at(NUM_OF_REPETITION/2));
         tempAlgTimesByLen.clear();
     }
     
     for (int i = 0; i < algTimes.size(); i++) {
-        cout << fixed << (1000 * pow(1.06478598, i)) << "\t" << algTimes.at(i) << endl;
+        cout << fixed << int (1000 * pow(1.06478598, i)) << "\t" << algTimes.at(i) << endl;
     }
     
 
