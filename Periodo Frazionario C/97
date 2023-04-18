@@ -87,7 +87,7 @@ int periodSmart(char s[],int n){
 void string_gen (int n, char *B) {
     srand(time(NULL));
     int j;
-    int q = rand()%(n+1);
+    int q = rand()%(n)+1;
     printf("q random:%d ", q);
     for (j=1; j<=n; j++) {
       if (j<=q) 
