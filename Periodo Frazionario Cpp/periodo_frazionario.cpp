@@ -8,7 +8,7 @@
 using namespace std;
 using namespace std::chrono;
 
-#define NUM_OF_REPETITION 5
+#define NUM_OF_REPETITION 1
 
 ostream &operator << (ostream &out, const vector<int> &vec);
 istream &operator >> (istream &in, vector<int> &vec);
@@ -20,6 +20,8 @@ int periodNaiveSub(string str);
 string generateStringFromLength(int len);
 double getResolution();
 void insertionSort (vector<double> &data, int n);
+
+string generateStringWorstCase(int len);
 
 typedef duration<double, seconds::period> secs;
 
@@ -50,11 +52,11 @@ int main(int argc, char const *argv[]) {
     steady_clock::time_point start;
     
     for (int i = 0; i < 100; i++) {
-        len = 1000 * pow(1.06478598, i);
+        len = 100 * pow(1.06478598, i);
         
         for (int j = 0; j < NUM_OF_REPETITION; j++) {
             count = 0;
-            str = generateStringFromLength(len);
+            str = generateStringWorstCase(len); //FromLength(len);
             
             start = steady_clock::now();
             do {
@@ -64,17 +66,18 @@ int main(int argc, char const *argv[]) {
             }while(duration_cast<secs>(end - start).count() <= (ris * (1/0.001 + 1)));
             
             double tempTime = (duration_cast<secs>(end - start).count()) / count;
-            tempAlgTimesByLen.push_back(tempTime);
+            // algTimes.push_back(tempTime);
+            cout << tempTime << endl;
         }
         
         // insertionSort(tempAlgTimesByLen, NUM_OF_REPETITION);
-        algTimes.push_back(tempAlgTimesByLen.at(2));
-        tempAlgTimesByLen.clear();
+        // algTimes.push_back(tempAlgTimesByLen.at(2));
+        // tempAlgTimesByLen.clear();
     }
     
-    for (int i = 0; i < algTimes.size(); i++) {
-        cout << fixed << algTimes.at(i) << endl;
-    }
+    // for (int i = 0; i < algTimes.size(); i++) {
+    //     cout << fixed << algTimes.at(i) << endl;
+    // }
     
     return 0;
 }
@@ -157,6 +160,19 @@ string generateStringFromLength(int len){
     }
     
     // cout << "Generated period: " << period << endl;
+
+    return str;
+}
+
+string generateStringWorstCase(int len){
+    srand(time(NULL));
+    string str = "";
+
+    // Generate period
+    for (int i = 0; i < len - 1; i++) {
+        str.push_back('a');
+    }
+    str.push_back('b');
 
     return str;
 }
