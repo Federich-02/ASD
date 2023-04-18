@@ -118,10 +118,10 @@ int main()
     double vettTempo[100];//vettore dove salvare il tempo mediano
 
     double resolution=getResolution();
-    double start_time=0;
-    double end_time=0;
     int n=0;
 	struct timespec timeNow;
+	struct timespec start_time;
+	struct timespec end_time;
 
 	for(int i=0; i<100; i++){
         printf("ciclo i: %d\n",i);
@@ -132,15 +132,15 @@ int main()
            printf("ciclo ripetizione: %d\n",j);
             char stringaNuova[n]; 
             string_gen(n,stringaNuova);
-            start_time=clock_gettime(CLOCK_MONOTONIC, &timeNow);
+            clock_gettime(CLOCK_MONOTONIC, &start_time);
             do{
                 //printf("dentro il while con count: %d\n",count);
                 periodSmart(stringaNuova,n);
                 count ++;
-                end_time =clock_gettime(CLOCK_MONOTONIC, &timeNow);
-            }while((end_time - start_time) <= (resolution*(1+1/0.001)));
+                clock_gettime(CLOCK_MONOTONIC, &end_time);
+            }while( duration(start_time, end_time) <= (resolution*(1+1/0.001)) );
             
-            double tempo = (end_time - start_time) / count; 
+            double tempo = duration (start_time, end_time) / count;
             printf("%d%f \n",n,tempo);
        }
 	}
