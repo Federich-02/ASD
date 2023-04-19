@@ -56,7 +56,7 @@ int main(int argc, char const *argv[]) {
         
         for (int j = 0; j < NUM_OF_REPETITION; j++) {
             count = 0;
-            str = generateStringWorstCase(len); //FromLength(len);
+            str = generateStringFromLength(len); //FromLength(len);
             
             start = steady_clock::now();
             do {
