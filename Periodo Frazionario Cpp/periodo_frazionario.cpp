@@ -8,7 +8,7 @@
 using namespace std;
 using namespace std::chrono;
 
-#define NUM_OF_REPETITION 1
+#define NUM_OF_REPETITION 5
 
 ostream &operator << (ostream &out, const vector<int> &vec);
 istream &operator >> (istream &in, vector<int> &vec);
@@ -19,7 +19,7 @@ int periodNaiveSub(string str);
 
 string generateStringFromLength(int len);
 double getResolution();
-void insertionSort (vector<double> &data, int n);
+void insertionSort (vector<double> data, int n);
 
 string generateStringWorstCase(int len);
 
@@ -66,13 +66,14 @@ int main(int argc, char const *argv[]) {
             }while(duration_cast<secs>(end - start).count() <= (ris * (1/0.001 + 1)));
             
             double tempTime = (duration_cast<secs>(end - start).count()) / count;
-            // algTimes.push_back(tempTime);
-            cout << tempTime << endl;
+            tempAlgTimesByLen.push_back(tempTime);
+            // cout << tempTime << endl;
         }
         
-        // insertionSort(tempAlgTimesByLen, NUM_OF_REPETITION);
+        insertionSort(tempAlgTimesByLen, NUM_OF_REPETITION);
         // algTimes.push_back(tempAlgTimesByLen.at(2));
-        // tempAlgTimesByLen.clear();
+        cout << fixed << tempAlgTimesByLen.at(2) << endl;
+        tempAlgTimesByLen.clear();
     }
     
     // for (int i = 0; i < algTimes.size(); i++) {
@@ -188,7 +189,7 @@ double getResolution() {
     return duration_cast<secs>(end - start).count();
 }
 
-void insertionSort (vector<double> &data, int n) {
+void insertionSort (vector<double> data, int n) {
     int j, tmp;
 
     for (int i=1; i<n; i++) {

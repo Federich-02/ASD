@@ -16,6 +16,8 @@ struct node {
 
     node(int k) {
         key = k;
+        alfaNumKey = "";
+        height = 1;
         left = new node(-1, nullptr, 0, nullptr, nullptr, nullptr);
         right = new node(-1, nullptr, 0, nullptr, nullptr, nullptr);
         parent = nullptr;
@@ -85,11 +87,11 @@ void readCommand(vector<string> &out) {
 
 // Insert
 void insertAVL(node *&root, int k) {
+    // Insert a new node on AVL
     node *newNode = new node(k);
     
     if (root == nullptr) {
         root = *&newNode;
-        root->height = 1;
     } else {
         node *y = root->parent;
         node *x = root;
@@ -108,14 +110,28 @@ void insertAVL(node *&root, int k) {
 
         if (y->key > k) {
             y->left = newNode;
+            
+            // Update AVL height if needed
+            if (y->right->key == -1){
+                while (y != nullptr) {
+                    y->height++;
+                    y = y->parent;
+                }
+            }
         } else {
             y->right = newNode;
+            
+            // Update AVL height if needed
+            if (y->left->key == -1){
+                while (y != nullptr) {
+                    y->height++;
+                    y = y->parent;
+                }
+            }
         }
 
-        // Update nodes height
-        // while () {
-
-        // }
+        // Apply rotations if necessary
+        
     }
 }
 
