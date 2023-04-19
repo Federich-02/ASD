@@ -5,10 +5,9 @@
 #include <math.h>
 #include <time.h>
 
-
 //#define MAX_LINE_SIZE 10000   // maximum size of a line of input
-#define A  1000
-#define RIPETIZIONI  2  //numero di ripetizioni del secondo ciclo for (quello per poi prendere la mediana)
+#define A  100.0
+#define RIPETIZIONI  5  //numero di ripetizioni del secondo ciclo for (quello per poi prendere la mediana)
 
 
 /*
@@ -29,11 +28,12 @@ int scanArray(char *a) {
     } while (numFilled > 0);
 
     return size;
+
 }*/
 
-void printArray(char *a, int n) {
+void printArray(double a[], int n) {
     for (int i = 0; i < n; i++)
-        printf("%c ", a[i]);
+        printf("%f ", a[i]);
 }
 
 double duration(struct timespec start, struct timespec end) {
@@ -50,12 +50,12 @@ double getResolution(){
     return duration(start, end);
 }
 
-int periodNaive (char s[], int size) {       
+int periodNaive (char s[], int size) {
     int p,j;
     for (p=1; p<=size; p++) {
 
         for (j=p+1; j<=size && s[j]==s[j-p]; j++) {
-            if ( j==size ) 
+            if ( j==size )
                 return p;
         }
     }
@@ -82,21 +82,47 @@ int periodSmart(char s[],int n){
     return (n - vettore[n]);
 }
 
+
 void string_gen (int n, char *B) {
     srand(time(NULL));
     int j;
-    int q = rand()%(10+1);
-    printf("%d ", q);
+    int q = rand()%(n)+1;
+    //printf("q random:%d ", q);
     for (j=1; j<=n; j++) {
-      if (j<=q) 
-        B[j]=rand()%3+97; //prendere le lettere possibili a b c
+      if (j<=q)
+        B[j]=rand()%3+'a'; //prendere le lettere possibili a b c
       else {
-        B[j]=B[ (j-1)%q +1]; // j - q
+        B[j]=B[j-q]; // j - q
       }
     }
-    //visualizziamo la stringa
-    /*for (j=1; j<=n; j++) 
-        putchar(B[j]);*/
+}
+
+void string_peggiore(char str[],int n){
+    for(int i=0; i<n; i++){
+        str[i]='a';
+    }
+    str[n]='b';
+}
+
+//INSERCTIONSORT
+void inserctionSort(double vett[]){
+    for(int i=0;i<RIPETIZIONI;i++){
+        vett[i] = vett[i]*(pow(10,8));
+    }
+    double chiave;
+    int i;
+     for(int j=2;j<RIPETIZIONI;j++){
+            chiave=vett[j];
+            i=j-1;
+            while(i>=0 && vett[i]>chiave){
+                vett[i+1]=vett[i];
+                i=i-1;
+            }
+            vett[i+1]=chiave;
+     }
+    for(int i=0;i<RIPETIZIONI;i++){
+        vett[i] = vett[i]/(pow(10,8));
+    }
 }
 
 int main()
@@ -114,38 +140,62 @@ int main()
     */
 
     //VARIABILI:
+    
     double vettValoriRipetuti[100*RIPETIZIONI]; //vettore dove salvare i tempi e cercare la mediana
     double vettTempo[100];//vettore dove salvare il tempo mediano
 
     double resolution=getResolution();
+    struct timespec start_time;
+    struct timespec end_time;
     int n=0;
-	struct timespec timeNow;
-	struct timespec start_time;
-	struct timespec end_time;
-
+    char stringaNuova[50000];
+    double tempiMediana[RIPETIZIONI];
+     
 	for(int i=0; i<100; i++){
-        printf("ciclo i: %d\n",i);
 		n=floor(A*pow(1.06478598,i));
-		int count=0;
-        //for per misurare piu' volte  
-       for(int j=0;j<RIPETIZIONI;j++){
-           printf("ciclo ripetizione: %d\n",j);
-            char stringaNuova[n]; 
+
+        for(int j=0;j<RIPETIZIONI;j++){
+           	int count=0;
             string_gen(n,stringaNuova);
             clock_gettime(CLOCK_MONOTONIC, &start_time);
             do{
-                //printf("dentro il while con count: %d\n",count);
+                periodNaive(stringaNuova,n);
+                count ++;
+                clock_gettime(CLOCK_MONOTONIC, &end_time);
+            }while(duration(start_time,end_time) <= (resolution*(1.0+1.0/0.001)));
+
+            double tempo = duration(start_time,end_time) / (double)count;
+            //printf("%f\n",tempo);
+            tempiMediana[j]=tempo;
+        }
+        //ordinamento tempiMEdiana[]
+        inserctionSort(tempiMediana);
+        printArray(tempiMediana,RIPETIZIONI);
+        printf("%d\t%d\t%f\n",i,n,tempiMediana[RIPETIZIONI/2]);
+	}
+/*
+    printf("\n\n switch algoritm \n\n");
+	for(int i=0; i<100; i++){
+
+		n=floor(A*pow(1.06478598,i));
+
+        for(int j=0;j<RIPETIZIONI;j++){
+           	int count=0;
+            clock_gettime(CLOCK_MONOTONIC, &start_time);
+            do{
                 periodSmart(stringaNuova,n);
                 count ++;
                 clock_gettime(CLOCK_MONOTONIC, &end_time);
-            }while( duration(start_time, end_time) <= (resolution*(1+1/0.001)) );
-            
-            double tempo = duration (start_time, end_time) / count;
-            printf("%d%f \n",n,tempo);
-       }
-	}
+            }while(duration(start_time,end_time) <= (resolution*(1.0+1.0/0.001)));
 
-    //codice per calcolare la mediana dei tempi, considerare 'RIPETIZIONI' 
+            double tempo = duration(start_time,end_time) / (double)count;
+            tempiMediana[j]=tempo;
+
+        }
+        inserctionSort(tempiMediana);
+        printf("%d\t%d\t%f\n",i,n,tempiMediana[RIPETIZIONI/2]);
+	}
+    */
     printf("fine");
     return 0;
 }
