@@ -98,7 +98,7 @@ void inserctionSort(double vett[]){
 }
 
 void  periodoFrazionario(int algoritmo,int caso,double resolution,struct timespec start_time,struct timespec end_time,int n,char stringaNuova[],double tempiMediana[]){ 
-    for(int i=98; i<100; i++){
+    for(int i=0; i<100; i++){
             n=floor(A*pow(1.06478598,i));
 
             for(int j=0;j<RIPETIZIONI;j++){
