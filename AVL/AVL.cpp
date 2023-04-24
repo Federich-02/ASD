@@ -1,3 +1,15 @@
+/*
+    Arghittu Thomas
+
+    AVL Implementation
+
+    - Funziona in tutti i casi base
+    - Non aggiorna ancora le altezze degli alberi
+    - Manca la verifica di bilanciamento non locale (aggiornare prima le altezze)
+    - Manca print nella forma polacca
+    - Manca cancellazione e ricerca
+*/
+
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -8,7 +20,6 @@ using namespace std;
 /// Generic node of a Binary Tree
 struct node {
     int key;
-    string alfaNumKey;
     int height;
     node *left;
     node *right;
@@ -16,16 +27,14 @@ struct node {
 
     node(int k) {
         key = k;
-        alfaNumKey = "";
         height = 1;
-        left = new node(-1, nullptr, 0, nullptr, nullptr, nullptr);
-        right = new node(-1, nullptr, 0, nullptr, nullptr, nullptr);
+        left = new node(-1, 0, nullptr, nullptr, nullptr);
+        right = new node(-1, 0, nullptr, nullptr, nullptr);
         parent = nullptr;
     }
 
-    node(int k, string alfaNumKey, int height, node *left, node *right, node *parent) {
+    node(int k, int height, node *left, node *right, node *parent) {
         key = k;
-        alfaNumKey = alfaNumKey;
         height = height;
         left = left;
         right = right;
@@ -35,8 +44,10 @@ struct node {
 
 void readCommand(vector<string> &out);
 
-void insertAVL(node *&root, int k);
-void balanceAVL(node *&root);
+node * insertAVL(node *root, int k);
+
+node * rightRotation(node *pin);
+node * leftRotation(node *pinNode);
 
 /// BST graphically print - No required
 ostream &operator << (ostream &out, const vector<int> &vec);
@@ -54,19 +65,24 @@ int main(int argc, char const *argv[]) {
 
     do {
         readCommand(command);
+        // for (int i=0; i<command.size(); i++)
+        //     cout << command[i];
 
-        if (command[0] == "insert") {
+        if (command[0] == "i") {
+            root = insertAVL(root, stoi(command[1]));
+            printBT(root);
+        } else if (command[0] == "f"){
 
-        } else if (command[0] == "find"){
-
-        } else if (command[0] == "exit") {
+        } else if (command[0] == "e") {
             status = false;
         } else {
             cout << "Invalid command" << endl;
         }
 
+        command.clear();
     } while (status);
     
+    return 0;
 }
 
 // Read BST input from polish form for build a BST
@@ -86,12 +102,18 @@ void readCommand(vector<string> &out) {
 }
 
 // Insert
-void insertAVL(node *&root, int k) {
+node * insertAVL(node *root, int k) {
     // Insert a new node on AVL
     node *newNode = new node(k);
+
+    newNode->height = 1;
+    newNode->left->left = nullptr;
+    newNode->left->right = nullptr;
+    newNode->right->left = nullptr;
+    newNode->right->right = nullptr;
     
     if (root == nullptr) {
-        root = *&newNode;
+        root = newNode;
     } else {
         node *y = root->parent;
         node *x = root;
@@ -111,28 +133,95 @@ void insertAVL(node *&root, int k) {
         if (y->key > k) {
             y->left = newNode;
             
-            // Update AVL height if needed
-            if (y->right->key == -1){
-                while (y != nullptr) {
-                    y->height++;
-                    y = y->parent;
+            // Verify if y height need to be updated
+            if (y->right->key == -1) {
+                y->height++;
+
+                // Verify if tree need to be updated too
+                if (y->parent != nullptr){
+                    if (y == y->parent->left){
+                        if (abs(y->height - y->parent->right->height) > 1){
+                            if (root == y->parent){
+                                root = rightRotation(y->parent);
+                            } else {
+                                y = y->parent;
+                                y->parent->left = rightRotation(y);
+                            }
+                        }
+                    } else {
+                        if (abs(y->height - y->parent->left->height) > 1){
+                            node * yy = y->parent;
+                            yy->right = rightRotation(y);
+                            
+                            if (yy->parent == nullptr){
+                                root = leftRotation(yy);
+                            } else {
+                                yy->parent->right = leftRotation(yy);
+                            }
+                        }
+                    }
                 }
             }
         } else {
             y->right = newNode;
             
-            // Update AVL height if needed
-            if (y->left->key == -1){
-                while (y != nullptr) {
-                    y->height++;
-                    y = y->parent;
+            // Verify if y height need to be updated
+            if (y->left->key == -1) {
+                y->height++;
+
+                // Verify if tree need to be updated too
+                if (y->parent != nullptr){
+                    if (y == y->parent->right){
+                        if (abs(y->height - y->parent->left->height) > 1){
+                            if (root == y->parent){
+                                root = leftRotation(y->parent);
+                            } else {
+                                y = y->parent;
+                                y->parent->right = leftRotation(y);
+                            }
+                        }
+                    } else {
+                        if (abs(y->height - y->parent->right->height) > 1){
+                            node * yy = y->parent;
+                            yy->left = leftRotation(y);
+                            if (yy->parent == nullptr){
+                                root = rightRotation(yy);
+                            } else {
+                                yy->parent->left = rightRotation(yy);
+                            }
+                        }
+                    }
                 }
             }
         }
-
-        // Apply rotations if necessary
-        
     }
+
+    return root;
+}
+
+node * rightRotation(node *pin){
+    node * temp = pin->left;
+
+    pin->left = temp->right;
+    temp->right = pin;
+
+    temp->parent = pin->parent;
+    pin->parent = temp;
+
+    return temp;
+}
+
+
+node * leftRotation(node *pin) {
+    node * temp = pin->right;
+
+    pin->right = temp->left;
+    temp->left = pin;
+
+    temp->parent = pin->parent;
+    pin->parent = temp;
+
+    return temp;
 }
 
 /// -----------------------COMMON OPERATION-----------------------
@@ -162,13 +251,13 @@ void printBT(const node* node){
 }
 
 void printBT(const string& prefix, const node* node, bool isLeft){
-    if( node != nullptr ) {
+    if( node->key != -1 ) {
         cout << prefix;
 
         cout << (isLeft ? "|--" : "---" );
 
         // print the value of the node
-        cout << "(" << node->key << ")" << endl;
+        cout << "(k: " << node->key << ", h: " << node->height << ")" << endl;
 
         // enter the next tree level - left and right branch
         printBT( prefix + (isLeft ? "|   " : "    "), node->right, true);
