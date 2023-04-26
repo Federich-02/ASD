@@ -2,10 +2,7 @@
     Arghittu Thomas
 
     AVL Implementation
-
-    - Funziona in tutti i casi base
-    - Non aggiorna ancora le altezze degli alberi
-    - Manca la verifica di bilanciamento non locale (aggiornare prima le altezze)
+    
     - Manca print nella forma polacca
     - Manca cancellazione e ricerca
 */
@@ -48,6 +45,9 @@ node * insertAVL(node *root, int k);
 
 node * rightRotation(node *pin);
 node * leftRotation(node *pinNode);
+
+int max(int, int);
+int getHeight(node * n);
 
 /// BST graphically print - No required
 ostream &operator << (ostream &out, const vector<int> &vec);
@@ -118,6 +118,7 @@ node * insertAVL(node *root, int k) {
         node *y = root->parent;
         node *x = root;
 
+        // Perform the normal BST insertion
         while (x->key != -1) {
             if (x->key > k) {
                 y = x;
@@ -132,75 +133,80 @@ node * insertAVL(node *root, int k) {
 
         if (y->key > k) {
             y->left = newNode;
-            
-            // Verify if y height need to be updated
-            if (y->right->key == -1) {
-                y->height++;
-
-                // Verify if tree need to be updated too
-                if (y->parent != nullptr){
-                    if (y == y->parent->left){
-                        if (abs(y->height - y->parent->right->height) > 1){
-                            if (root == y->parent){
-                                root = rightRotation(y->parent);
-                            } else {
-                                y = y->parent;
-                                y->parent->left = rightRotation(y);
-                            }
-                        }
-                    } else {
-                        if (abs(y->height - y->parent->left->height) > 1){
-                            node * yy = y->parent;
-                            yy->right = rightRotation(y);
-                            
-                            if (yy->parent == nullptr){
-                                root = leftRotation(yy);
-                            } else {
-                                yy->parent->right = leftRotation(yy);
-                            }
-                        }
-                    }
-                }
-            }
         } else {
             y->right = newNode;
-            
-            // Verify if y height need to be updated
-            if (y->left->key == -1) {
-                y->height++;
+        }
 
-                // Verify if tree need to be updated too
-                if (y->parent != nullptr){
-                    if (y == y->parent->right){
-                        if (abs(y->height - y->parent->left->height) > 1){
-                            if (root == y->parent){
-                                root = leftRotation(y->parent);
-                            } else {
-                                y = y->parent;
-                                y->parent->right = leftRotation(y);
-                            }
-                        }
+        // Update height of the tree => O(log n)
+        if (y->left->key == -1 || y->right->key == -1) {
+            x = y;
+            while (x != nullptr) {
+                x->height = max(getHeight(x->left) + 1, getHeight(x->right) + 1);
+                x = x->parent;
+            }
+        }
+
+        // Balance AVL
+        while (y != nullptr) {
+            if (y->parent == nullptr)
+                break;
+            if (y == y->parent->left) {
+                if (abs(y->height - y->parent->right->height) > 1){
+                    node * yy = y->parent;
+                    if (y->right == newNode) {
+                        yy->left = leftRotation(y);
+                    }
+                    
+                    if (yy == root) {
+                        root = rightRotation(yy);
                     } else {
-                        if (abs(y->height - y->parent->right->height) > 1){
-                            node * yy = y->parent;
-                            yy->left = leftRotation(y);
-                            if (yy->parent == nullptr){
-                                root = rightRotation(yy);
-                            } else {
-                                yy->parent->left = rightRotation(yy);
-                            }
+                        if (yy == yy->parent->left) {
+                            yy->parent->left = rightRotation(yy);
+                        } else {
+                            yy->parent->right = rightRotation(yy);
                         }
+                    }
+                    yy = yy->parent->parent;
+                    while (yy != nullptr) {
+                        yy->height--;
+                        yy = yy->parent;
+                    }
+                }
+            } else {
+                if (abs(y->height - y->parent->left->height) > 1){
+                    node * yy = y->parent;
+                    if (y->left == newNode) {
+                        yy->right = rightRotation(y);
+                    }
+
+                    if (yy == root) {
+                        root = leftRotation(yy);
+                    } else {
+                        if (yy == yy->parent->left) {
+                            yy->parent->left = leftRotation(yy);
+                        } else {
+                            yy->parent->right = leftRotation(yy);
+                        }
+                    }
+                    yy = yy->parent->parent;
+                    while (yy != nullptr) {
+                        yy->height--;
+                        yy = yy->parent;
                     }
                 }
             }
+
+            y = y->parent;
         }
     }
 
     return root;
 }
 
-node * rightRotation(node *pin){
+node * rightRotation(node *pin) {
     node * temp = pin->left;
+
+    pin->height = pin->height - 2;
 
     pin->left = temp->right;
     temp->right = pin;
@@ -215,6 +221,8 @@ node * rightRotation(node *pin){
 node * leftRotation(node *pin) {
     node * temp = pin->right;
 
+    pin->height = pin->height - 2;
+
     pin->right = temp->left;
     temp->left = pin;
 
@@ -222,6 +230,19 @@ node * leftRotation(node *pin) {
     pin->parent = temp;
 
     return temp;
+}
+
+int max(int a, int b) {
+    if (a >= b)
+        return a;
+
+    return b;
+}
+int getHeight(node * n){
+    if (n->key == -1)
+        return 0;
+    
+    return n->height;
 }
 
 /// -----------------------COMMON OPERATION-----------------------
