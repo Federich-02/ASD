@@ -2,8 +2,6 @@
     Arghittu Thomas
 
     AVL Implementation
-
-    - Manca cancellazione e ricerca
 */
 
 #include <iostream>
@@ -16,14 +14,25 @@ using namespace std;
 /// Generic node of a Binary Tree
 struct node {
     int key;
+    string alfNumKey;
     int height;
     node *left;
     node *right;
     node *parent;
 
-    node(int k) {
+    node(int k, string alfNumKeyVal) {
         key = k;
+        alfNumKey = alfNumKeyVal;
         height = 1;
+        left = new node(-1, 0, nullptr, nullptr, nullptr);
+        right = new node(-1, 0, nullptr, nullptr, nullptr);
+        parent = nullptr;
+    }
+
+    node(int k, string alfNumKeyVal, int height) {
+        key = k;
+        alfNumKey = alfNumKeyVal;
+        height = height;
         left = new node(-1, 0, nullptr, nullptr, nullptr);
         right = new node(-1, 0, nullptr, nullptr, nullptr);
         parent = nullptr;
@@ -39,9 +48,9 @@ struct node {
 };
 
 
-node * insertAVL(node *root, int k);
-node * findAVL(node *root, int key);
+node * insertAVL(node *root, int k, string alfNumKey);
 node * removeAVL(node *root, int key);
+string findAVL(node *root, int key);
 
 node * rightRotation(node *pin);
 node * leftRotation(node *pinNode);
@@ -49,8 +58,10 @@ node * fixAVL(node * root, node * y);
 
 int max(int, int);
 int getHeight(node * n);
+int getBalance(node * n);
 
-node * predecessorAVL(node * y);
+node * successorAVL(node * y);
+node * findAVLAdd(node *root, int key);
 
 void printInPolishForm(node *root);
 
@@ -75,8 +86,8 @@ int main(int argc, char const *argv[]) {
         //     cout << command[i];
 
         if (command[0] == "insert") {
-            root = insertAVL(root, stoi(command[1]));
-            printBT(root);
+            root = insertAVL(root, stoi(command[1]), command[2]);
+            // printBT(root);
         } else if (command[0] == "find"){
             cout << findAVL(root, stoi(command[1])) << endl;
         } else if (command[0] == "show") {
@@ -84,7 +95,9 @@ int main(int argc, char const *argv[]) {
             cout << endl;
         } else if (command[0] == "remove"){
             root = removeAVL(root, stoi(command[1]));
-            printBT(root);
+            // printBT(root);
+        } else if (command[0] == "clear") {
+            root = nullptr;
         } else if (command[0] == "exit") {
             status = false;
         } else {
@@ -98,212 +111,325 @@ int main(int argc, char const *argv[]) {
 }
 
 // Insert new node in AVL
-node * insertAVL(node *root, int k) {
-    // Insert a new node on AVL
-    node *newNode = new node(k);
+// node * insertAVL(node *root, int k, string alfNumKey) {
+//     // Insert a new node on AVL
+//     node *newNode = new node(k, alfNumKey);
 
-    newNode->height = 1;
-    newNode->left->left = nullptr;
-    newNode->left->right = nullptr;
-    newNode->right->left = nullptr;
-    newNode->right->right = nullptr;
+//     newNode->height = 1;
+//     newNode->left->left = nullptr;
+//     newNode->left->right = nullptr;
+//     newNode->right->left = nullptr;
+//     newNode->right->right = nullptr;
     
-    if (root == nullptr) {
-        root = newNode;
-    } else {
-        node *y = root->parent;
-        node *x = root;
+//     if (root == nullptr) {
+//         root = newNode;
+//     } else {
+//         node *y = root->parent;
+//         node *x = root;
 
-        // Perform the normal BST insertion
-        while (x->key != -1) {
-            if (x->key > k) {
-                y = x;
-                x = y->left;
-            } else {
-                y = x;
-                x = y->right;
-            }
-        }
+//         // Perform the normal BST insertion
+//         while (x->key != -1) {
+//             if (x->key > k) {
+//                 y = x;
+//                 x = y->left;
+//             } else {
+//                 y = x;
+//                 x = y->right;
+//             }
+//         }
 
-        newNode->parent = y;
+//         newNode->parent = y;
 
-        if (y->key > k) {
-            y->left = newNode;
-        } else {
-            y->right = newNode;
-        }
+//         if (y->key > k) {
+//             y->left = newNode;
+//         } else {
+//             y->right = newNode;
+//         }
 
-        // Update height of the tree => O(log n)
-        if (y->left->key == -1 || y->right->key == -1) {
-            x = y;
-            while (x != nullptr) {
-                x->height = max(getHeight(x->left) + 1, getHeight(x->right) + 1);
-                x = x->parent;
-            }
-        }
+//         // Update height of the tree => O(log n)
+//         if (y->left->key == -1 || y->right->key == -1) {
+//             x = y;
+//             while (x != nullptr) {
+//                 x->height = max(getHeight(x->left) + 1, getHeight(x->right) + 1);
+//                 x = x->parent;
+//             }
+//         }
 
-        // Fix AVL
-        root = fixAVL(root, y);
+//         // Fix AVL
+//         root = fixAVL(root, y);
+//     }
+
+//     return root;
+// }
+
+// AVL insertion operation
+node * insertAVL(node *root, int k, string alfNumKey) {
+    // Normal BST insertion (recursive)
+    if(root == nullptr)
+        return new node(k, alfNumKey);
+
+    if(root->key == -1)
+        return new node(k, alfNumKey);
+    
+    if(k < root->key)
+        root->left = insertAVL(root->left, k, alfNumKey);
+    else if (k > root->key)
+        root->right = insertAVL(root->right, k, alfNumKey);
+    else
+        return root;
+
+    // Update current node height
+    root->height = max(getHeight(root->left) + 1, getHeight(root->right) + 1);
+
+    int balance = getBalance(root);
+
+    // Fix AVL if unbalanced
+
+    // LL case
+    if (balance > 1 && k < root->left->key)
+        return rightRotation(root);
+    // RR case
+    if (balance < -1 && k > root->right->key)
+        return leftRotation(root);
+    // LR case
+    if (balance > 1 && k > root->left->key) {
+        root->left = leftRotation(root->left);
+        return rightRotation(root);
+    }
+    // RL case
+    if (balance < -1 && k < root->right->key) {
+        root->right = rightRotation(root->right);
+        return leftRotation(root);
     }
 
     return root;
 }
 
-// Find node in AVL (Recursive)
-node * findAVL(node *root, int key){
+
+// Remove node from AVL
+// node * removeAVL(node *root, int key) {
+//     node * y = findAVLAdd(root, key);
+
+//     if (y == nullptr) {
+//         return root;
+//     }
+
+//     if (y->left->key == -1 && y->right->key == -1) {
+//         if (y == root)
+//             return nullptr;
+        
+//         y->key = -1;
+//         y->height = 0;
+
+//         if (y->parent->left->key == -1 || y->parent->right->key == -1) {
+//             node * x = y->parent;
+//             while (x != nullptr) {
+//                 x->height = max(getHeight(x->left) + 1, getHeight(x->right) + 1);
+//                 x = x->parent;
+//             }
+//         }
+
+//         if (y->parent->left->key == -1 && y->parent->right->key == -1) {
+//             root = fixAVL(root, y->parent);
+//         } else {
+//             if (y == y->parent->left)
+//                 root = fixAVL(root, y->parent->right);
+//             else
+//                 root = fixAVL(root, y->parent->left);
+//         }
+//     } else if (y->right->key == -1) {
+//         // Cerco il predecessore di y, lo scrivo al suo posto e chiamo fix sull'ex padre del predecessore
+//         node * x = y->parent;
+        
+//         if (y != root) {
+//             if (y == x->left) {
+//                 x->left = y->left;
+//                 x->left->parent = x;
+//             } else {
+//                 x->right = y->left;
+//                 x->right->parent = x;
+//             }
+//         } else {
+//             root = y->left;
+//             root->parent = nullptr;
+//         }
+
+//         root = fixAVL(root, x);
+//     } else if (y->left->key == -1) {
+//         // Cerco il sucessore di y, lo scrivo al suo posto e chiamo fix sull'ex padre del sucessore
+//         node * x = y->parent;
+
+//         if (y != root) {
+//             if (y == x->left) {
+//                 x->left = y->right;
+//                 x->left->parent = x;
+//             } else {
+//                 x->right = y->right;
+//                 x->right->parent = x;
+//             }
+//         } else {
+//             root = y->right;
+//             root->parent = nullptr;
+//         }
+
+//         root = fixAVL(root, x);
+//     } else {
+//         // Cerco il successore o predecessore in base alle altezze del sotto albero e richiamo fix sull'ex padre
+//         node * x = y->parent;
+//         node * succ = successorAVL(y);
+//         node * succPar = succ->parent;
+
+//         if (y != root) {
+//             if (y == x->left) {
+//                 x->left = succ;
+//                 succ->parent = x;
+
+//                 if (y->right != succ)
+//                     succ->right = y->right;
+                
+//                 succ->left = y->left;
+
+//                 succ->height = y->height;
+
+//                 if (succ == succPar->left)
+//                     succPar->left = new node(-1, "");
+//                 else if (succ == succPar->right)
+//                     succPar->right = new node(-1, "");
+
+//                 if (succPar == y)
+//                     succPar = x->left;
+//             } else {
+//                 x->right = succ;
+//                 succ->parent = x;
+
+//                 if (y->right != succ)
+//                     succ->right = y->right;
+                
+//                 succ->left = y->left;
+
+//                 if (succ == succPar->left)
+//                     succPar->left = new node(-1, "");
+//                 else if (succ == succPar->right)
+//                     succPar->right = new node(-1, "");
+
+//                 if (succPar == y)
+//                     succPar = x->right;
+//             }
+//             while (x != nullptr) {
+//                 x->height = max(getHeight(x->left) + 1, getHeight(x->right) + 1);
+//                 x = x->parent;
+//             }
+
+//         } else {
+//             root = succ;
+//             root->parent = nullptr;
+
+//             if (y->right != succ) {
+//                 succ->right = y->right;
+//                 succ->right->parent = root;
+//             }
+
+//             succ->left = y->left;
+
+//             root->left->parent = root;
+
+//             root->height = max(getHeight(root->left) + 1, getHeight(root->right) + 1);
+//             if (succPar == root) {
+//                 if (root->left->key != -1)
+//                     succPar = root->left;
+//                 else if (root->right->key != -1)
+//                     succPar = root->right;
+//             }
+//         }
+
+//         root = fixAVL(root, succPar);
+//     }
+
+//     return root;
+// }
+
+node * removeAVL(node *root, int key) {
+    if (root == nullptr)
+        return root;
+
+    if (key < root->key)
+        root->left = removeAVL(root->left, key);
+    else if (key > root->key)
+        root->right = removeAVL(root->right, key);
+    else {
+        if (root->left->key == -1 || root->right->key == -1) {
+            node * temp;
+
+            if (root->left->key != -1)
+                temp = root->left;
+            else
+                temp = root->right;
+
+            // No children case
+            if (temp->key == -1) {
+                temp = root;
+                root = new node(-1, "", 0);
+            }
+            // One child case
+            else {
+                *root = *temp;
+            }
+        } else {
+            node * temp = successorAVL(root->right);
+            
+            root->key = temp->key;
+            root->alfNumKey = temp->alfNumKey;
+
+            root->right = removeAVL(root->right, temp->key);
+        }
+    }
+
+
+    if (root == nullptr)
+        return root;
+
     if (root->key == -1)
-        return nullptr;
+        return root;
+
+    // Update current node height
+    root->height = max(getHeight(root->left) + 1, getHeight(root->right) + 1);
+
+    int balance = getBalance(root);
+
+    // Fix AVL if unbalanced
+
+    // LL case
+    if (balance > 1 && getBalance(root->left) >= 0)
+        return rightRotation(root);
+    // RR case
+    if (balance < -1 && getBalance(root->right) <= 0)
+        return leftRotation(root);
+    // LR case
+    if (balance > 1 && getBalance(root->left) < 0) {
+        root->left = leftRotation(root->left);
+        return rightRotation(root);
+    }
+    // RL case
+    if (balance < -1 && getBalance(root->right) > 0) {
+        root->right = rightRotation(root->right);
+        return leftRotation(root);
+    }
+
+    return root;
+}
+
+// Find (Recursive)
+string findAVL(node *root, int key) {
+    if (root->key == -1)
+        return "";
     
     if (root->key > key){
         return findAVL(root->left, key);
     } else if (root->key < key) {
         return findAVL(root->right, key);
     } else {
-        return root;
+        return root->alfNumKey;
     }
-}
-
-// Remove node from AVL
-node * removeAVL(node *root, int key) {
-    node * y = findAVL(root, key);
-
-    if (y == nullptr) {
-        return root;
-    }
-
-    if (y->left->key == -1 && y->right->key == -1) {
-        if (y == root)
-            return nullptr;
-        
-        y->key = -1;
-        y->height = 0;
-
-        if (y->parent->left->key == -1 || y->parent->right->key == -1) {
-            node * x = y->parent;
-            while (x != nullptr) {
-                x->height = max(getHeight(x->left) + 1, getHeight(x->right) + 1);
-                x = x->parent;
-            }
-        }
-
-        if (y->parent->left->key == -1 && y->parent->right->key == -1) {
-            root = fixAVL(root, y->parent);
-        } else {
-            if (y == y->parent->left)
-                root = fixAVL(root, y->parent->right);
-            else
-                root = fixAVL(root, y->parent->left);
-        }
-    } else if (y->right->key == -1) {
-        // Cerco il predecessore di y, lo scrivo al suo posto e chiamo fix sull'ex padre del predecessore
-        node * x = y->parent;
-        
-        if (y != root) {
-            if (y == x->left) {
-                x->left = y->left;
-                x->left->parent = x;
-            } else {
-                x->right = y->left;
-                x->right->parent = x;
-            }
-        } else {
-            root = y->left;
-            root->parent = nullptr;
-        }
-
-        root = fixAVL(root, x);
-    } else if (y->left->key == -1) {
-        // Cerco il sucessore di y, lo scrivo al suo posto e chiamo fix sull'ex padre del sucessore
-        node * x = y->parent;
-
-        if (y != root) {
-            if (y == x->left) {
-                x->left = y->right;
-                x->left->parent = x;
-            } else {
-                x->right = y->right;
-                x->right->parent = x;
-            }
-        } else {
-            root = y->right;
-            root->parent = nullptr;
-        }
-
-        root = fixAVL(root, x);
-    } else {
-        // Cerco il successore o predecessore in base alle altezze del sotto albero e richiamo fix sull'ex padre
-        node * x = y->parent;
-        node * succ = predecessorAVL(y);
-        node * succPar = succ->parent;
-
-        if (y != root) {
-            if (y == x->left) {
-                x->left = succ;
-                succ->parent = x;
-
-                if (y->left != succ)
-                    succ->left = y->left;
-                
-                succ->right = y->right;
-
-                succ->height = y->height;
-
-                if (succ == succPar->left)
-                    succPar->left = new node(-1);
-                else if (succ == succPar->right)
-                    succPar->right = new node(-1);
-
-                if (succPar == y)
-                    succPar = x->left;
-            } else {
-                x->right = succ;
-                succ->parent = x;
-
-                if (y->left != succ)
-                    succ->left = y->left;
-                
-                succ->right = y->right;
-
-                if (succ == succPar->left)
-                    succPar->left = new node(-1);
-                else if (succ == succPar->right)
-                    succPar->right = new node(-1);
-
-                if (succPar == y)
-                    succPar = x->right;
-            }
-            while (x != nullptr) {
-                x->height = max(getHeight(x->left) + 1, getHeight(x->right) + 1);
-                x = x->parent;
-            }
-
-        } else {
-            root = succ;
-            root->parent = nullptr;
-
-            if (y->left != succ) {
-                succ->left = y->left;
-                succ->left->parent = root;
-            }
-
-            succ->right = y->right;
-
-            root->right->parent = root;
-
-            root->height = max(getHeight(root->left) + 1, getHeight(root->right) + 1);
-            // ! SISTEMARE LE ALTEZZE NEL CASO
-            if (succPar == root) {
-                if (root->left->key != -1)
-                    succPar = root->left;
-                else if (root->right->key != -1)
-                    succPar = root->right;
-            } 
-        }
-
-        root = fixAVL(root, succPar);
-    }
-
-    return root;
 }
 
 // Fix AVL
@@ -371,11 +497,15 @@ node * fixAVL(node * root, node * y) {
 
 // Print in polish form
 void printInPolishForm(node *root) {
+    if (root == nullptr) {
+        cout << "NULL ";
+        return;
+    }
     if (root->key == -1){
         cout << "NULL ";
         return;
     }
-    cout << root->key << " ";
+    cout << root->key << ":" << root->alfNumKey << ":" << root->height << " ";
     printInPolishForm(root->left);
     printInPolishForm(root->right);
 }
@@ -383,13 +513,10 @@ void printInPolishForm(node *root) {
 // Right rotation
 node * rightRotation(node *pin) {
     node * temp = pin->left;
+    node * T2 = temp->right;
 
-
-    pin->left = temp->right;
     temp->right = pin;
-
-    temp->parent = pin->parent;
-    pin->parent = temp;
+    pin->left = T2;
 
     pin->height = max(getHeight(pin->left) + 1, getHeight(pin->right) + 1);
     temp->height = max(getHeight(temp->left) + 1, getHeight(temp->right) + 1);
@@ -400,13 +527,10 @@ node * rightRotation(node *pin) {
 // Left rotation
 node * leftRotation(node *pin) {
     node * temp = pin->right;
+    node * T2 = temp->left;
 
-
-    pin->right = temp->left;
     temp->left = pin;
-
-    temp->parent = pin->parent;
-    pin->parent = temp;
+    pin->right = T2;
 
     pin->height = max(getHeight(pin->left) + 1, getHeight(pin->right) + 1);
     temp->height = max(getHeight(temp->left) + 1, getHeight(temp->right) + 1);
@@ -430,17 +554,36 @@ int getHeight(node * n){
     return n->height;
 }
 
-node * predecessorAVL(node * y) {
+// Get Balance factor of node N  
+int getBalance(node * n) {  
+    if (n->key == -1)  
+        return 0;  
+    return getHeight(n->left) - getHeight(n->right);  
+} 
+
+node * successorAVL(node * y) {
     if (y == nullptr)
         return nullptr;
 
-    y = y->left;
-
-    while (y->right->key != -1) {
-        y = y->right;
+    while (y->left->key != -1) {
+        y = y->left;
     }
 
     return y;
+}
+
+// Find node in AVL (Recursive) and return address
+node * findAVLAdd(node *root, int key){
+    if (root->key == -1)
+        return nullptr;
+    
+    if (root->key > key){
+        return findAVLAdd(root->left, key);
+    } else if (root->key < key) {
+        return findAVLAdd(root->right, key);
+    } else {
+        return root;
+    }
 }
 
 /// -----------------------COMMON OPERATION-----------------------
