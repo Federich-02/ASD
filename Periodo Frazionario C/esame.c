@@ -97,7 +97,7 @@ void inserctionSort(double vett[]){
      }
 }
 
-double median(double vett[]){
+double mean(double vett[]){
     double media=0;
      for(int j=0;j<RIPETIZIONI;j++){
             media+=vett[j];
@@ -142,9 +142,8 @@ void  periodoFrazionario(int algoritmo,int caso,double resolution,struct timespe
             //ordinamento del vettore
             inserctionSort(tempiMediana);
             //calcolo della sigma e tempo medio
-            printf(" %d\t%d\t%15.13lf\t%15.13lf\t%15.13lf\n",i,n,tempiMediana[RIPETIZIONI/2],median(tempiMediana),sigma(tempiMediana,median(tempiMediana)));
+            printf(" %d\t%d\t%15.13lf\t%15.13lf\t%15.13lf\n",i,n,tempiMediana[RIPETIZIONI/2],mean(tempiMediana),sigma(tempiMediana,mean(tempiMediana)));
         }
-        //printf(" errore quadratico medio:%lf\n", sigma(tempiMediana,median(tempiMediana)));
 
 }
 
@@ -159,15 +158,16 @@ int main()
     double tempiMediana[RIPETIZIONI];
     
        printf("\n\n naive pessimo \n\n");
-    //periodoFrazionario(1,0,resolution,start_time,end_time,n,stringaNuova,tempiMediana); //naive pessimo
+    periodoFrazionario(1,0,resolution,start_time,end_time,n,stringaNuova,tempiMediana); //naive pessimo
      
-        //printf("\n\n nave medio \n\n");
-    //periodoFrazionario(1,1,resolution,start_time,end_time,n,stringaNuova,tempiMediana);/* //naive medio
-        printf("\n\n smart pessimo \n\n");
-       
-    //periodoFrazionario(2,0,resolution,start_time,end_time,n,stringaNuova,tempiMediana); //smart pessimo
-        /*printf("\n\n smart medio \n\n");*/
-    //periodoFrazionario(2,1,resolution,start_time,end_time,n,stringaNuova,tempiMediana); //smart medio
+       printf("\n\n nave medio \n\n");
+    periodoFrazionario(1,1,resolution,start_time,end_time,n,stringaNuova,tempiMediana); //naive medio
+        
+       printf("\n\n smart pessimo \n\n")     
+    periodoFrazionario(2,0,resolution,start_time,end_time,n,stringaNuova,tempiMediana); //smart pessimo
+    
+        printf("\n\n smart medio \n\n");
+    periodoFrazionario(2,1,resolution,start_time,end_time,n,stringaNuova,tempiMediana); //smart medio
     printf("risoluzione: %15.13lf",resolution);
     printf("fine");
     return 0;
