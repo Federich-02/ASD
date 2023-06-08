@@ -56,11 +56,11 @@ int main(int argc, char const *argv[]) {
         
         for (int j = 0; j < NUM_OF_REPETITION; j++) {
             count = 0;
-            str = generateStringFromLength(len); //FromLength(len);
+            str = generateStringFromLength(len);
             
             start = steady_clock::now();
             do {
-                periodNaive(str);
+                periodSmart(str);
                 count++;
                 end = steady_clock::now();
             }while(duration_cast<secs>(end - start).count() <= (ris * (1/0.001 + 1)));
@@ -70,9 +70,15 @@ int main(int argc, char const *argv[]) {
             // cout << tempTime << endl;
         }
         
-        insertionSort(tempAlgTimesByLen, NUM_OF_REPETITION);
+        // insertionSort(tempAlgTimesByLen, NUM_OF_REPETITION);
         // algTimes.push_back(tempAlgTimesByLen.at(2));
-        cout << fixed << tempAlgTimesByLen.at(2) << endl;
+        
+        for(int i=0; i<tempAlgTimesByLen.size(); i++) {
+            cout << fixed << tempAlgTimesByLen.at(i) << "\t";
+        }
+
+        cout << endl;
+
         tempAlgTimesByLen.clear();
     }
     
